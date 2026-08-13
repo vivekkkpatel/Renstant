@@ -465,4 +465,17 @@ private double calculateDistanceKm(
     return EARTH_RADIUS_KM * c;
 }
 
+public List<Vehicle> getFeaturedVehicles() {
+
+    return vehicleRepository.findAll()
+            .stream()
+            .filter(vehicle ->
+                    Boolean.TRUE.equals(vehicle.getActive()))
+            .filter(vehicle ->
+                    vehicle.getShop() != null &&
+                    Boolean.TRUE.equals(vehicle.getShop().getActive()))
+            .limit(6)
+            .toList();
+}
+
 }

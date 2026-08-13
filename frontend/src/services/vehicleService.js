@@ -69,3 +69,8 @@ export const getVehicleById = async (vehicleId) => {
     const response = await api.get(`/vehicles/${vehicleId}`);
     return response.data;
 };
+
+export const getFeaturedVehicles = async () => {
+    const response = await api.get("/vehicles/featured");
+    return response.data;
+};

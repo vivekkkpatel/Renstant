@@ -3,9 +3,42 @@ import { useNavigate } from "react-router-dom";
 
 import SearchBar from "../components/SearchBar";
 
+import { useEffect, useState } from "react";
+import { getFeaturedVehicles } from "../services/vehicleService";
+import VehicleCard from "../components/VehicleCard";
+
+
+
 function Home() {
 
     const navigate = useNavigate();
+
+    const [vehicles, setVehicles] = useState([]);
+
+useEffect(() => {
+
+    const fetchFeaturedVehicles = async () => {
+
+        try {
+
+            const data = await getFeaturedVehicles();
+
+            setVehicles(data);
+
+        } catch (err) {
+
+            console.error(
+                "Failed to load featured vehicles:",
+                err
+            );
+
+        }
+
+    };
+
+    fetchFeaturedVehicles();
+
+}, []);
 
     return (
         <div className="bg-gray-50">
@@ -35,6 +68,45 @@ function Home() {
 
             {/* Search */}
             <SearchBar />
+
+            {vehicles.length > 0 && (
+    <section className="mx-auto max-w-7xl px-6 py-20">
+
+        <div className="mb-10">
+
+            <p className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Featured
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold text-gray-900">
+                Popular vehicles
+            </h2>
+
+            <p className="mt-2 text-gray-500">
+                Explore some of the vehicles available on Renstant.
+            </p>
+
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+            {vehicles.map((vehicle) => (
+
+                <VehicleCard
+                    key={vehicle.id}
+                    vehicle={{
+                        ...vehicle,
+                        vehicleId: vehicle.id,
+                    }}
+                    showAvailability={false}
+                />
+
+            ))}
+
+        </div>
+
+    </section>
+)}
 
 
             {/* Vehicle Categories */}

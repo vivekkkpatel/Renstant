@@ -49,6 +49,18 @@ public class VehicleController {
         return vehicleService.getAllVehicles();
     }
 
+    @GetMapping("/vehicles/featured")
+public ResponseEntity<List<VehicleResponse>> getFeaturedVehicles() {
+
+    List<VehicleResponse> vehicles =
+            vehicleService.getFeaturedVehicles()
+                    .stream()
+                    .map(this::toResponse)
+                    .toList();
+
+    return ResponseEntity.ok(vehicles);
+}
+
     // Public - get vehicle details
 @GetMapping("/vehicles/{vehicleId}")
 public ResponseEntity<VehicleResponse> getVehicleById(
