@@ -92,29 +92,54 @@ function MyBookings() {
         }
     };
 
+    // const getStatusClass = (status) => {
+
+    //     switch (status) {
+
+    //         case "PENDING":
+    //             return "bg-yellow-50 text-yellow-700";
+
+    //         case "CONFIRMED":
+    //             return "bg-blue-50 text-blue-700";
+
+    //         case "ACTIVE":
+    //             return "bg-green-50 text-green-700";
+
+    //         case "COMPLETED":
+    //             return "bg-gray-100 text-gray-700";
+
+    //         case "CANCELLED":
+    //             return "bg-red-50 text-red-700";
+
+    //         default:
+    //             return "bg-gray-100 text-gray-700";
+    //     }
+    // };
+
     const getStatusClass = (status) => {
 
-        switch (status) {
+    switch (status) {
 
-            case "PENDING":
-                return "bg-yellow-50 text-yellow-700";
+        case "PAYMENT_PENDING":
+            return "bg-yellow-50 text-yellow-700";
 
-            case "CONFIRMED":
-                return "bg-blue-50 text-blue-700";
+        case "CONFIRMED":
+            return "bg-blue-50 text-blue-700";
 
-            case "ACTIVE":
-                return "bg-green-50 text-green-700";
+        case "ACTIVE":
+            return "bg-green-50 text-green-700";
 
-            case "COMPLETED":
-                return "bg-gray-100 text-gray-700";
+        case "COMPLETED":
+            return "bg-gray-100 text-gray-700";
 
-            case "CANCELLED":
-                return "bg-red-50 text-red-700";
+        case "CANCELLED":
+            return "bg-red-50 text-red-700";
 
-            default:
-                return "bg-gray-100 text-gray-700";
-        }
-    };
+        default:
+            return "bg-gray-100 text-gray-700";
+    }
+};
+
 
     if (loading) {
         return (
@@ -323,29 +348,26 @@ function MyBookings() {
                                     View Booking
                                 </button>
 
-                                {booking.status === "PENDING" && (
+                                {(booking.status === "PAYMENT_PENDING" ||
+    booking.status === "CONFIRMED") && (
 
-                                    <button
-                                        onClick={() =>
-                                            handleCancel(
-                                                booking.id
-                                            )
-                                        }
-                                        disabled={
-                                            cancellingId ===
-                                            booking.id
-                                        }
-                                        className="flex items-center justify-center gap-2 rounded-xl border border-red-200 px-6 py-3 font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                        <XCircle size={18} />
+    <button
+        onClick={() =>
+            handleCancel(booking.id)
+        }
+        disabled={
+            cancellingId === booking.id
+        }
+        className="flex items-center justify-center gap-2 rounded-xl border border-red-200 px-6 py-3 font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+        <XCircle size={18} />
 
-                                        {cancellingId ===
-                                        booking.id
-                                            ? "Cancelling..."
-                                            : "Cancel Booking"}
-                                    </button>
+        {cancellingId === booking.id
+            ? "Cancelling..."
+            : "Cancel Booking"}
+    </button>
 
-                                )}
+)}
 
                             </div>
 

@@ -3,6 +3,7 @@ import { CheckCircle, MapPin, CalendarDays, Clock } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getBookingById } from "../services/bookingService";
+import { createPaymentOrder, verifyPayment } from "../services/paymentService";
 
 function BookingConfirmation() {
 
@@ -12,6 +13,8 @@ function BookingConfirmation() {
     const [booking, setBooking] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const [paying, setPaying] = useState(false);
 
     useEffect(() => {
 
@@ -43,6 +46,172 @@ function BookingConfirmation() {
         fetchBooking();
 
     }, [bookingId]);
+
+    const handlePayment = async () => {
+
+    try {
+
+        setPaying(true);
+        setError("");
+
+        // 1. Create Razorpay order from backend
+        const order = await createPaymentOrder(booking.id);
+
+        // 2. Open Razorpay Checkout
+        const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+            amount: Math.round(Number(order.amount) * 100),
+
+            currency: order.currency,
+
+            name: "Renstant",
+
+            description: `Payment for ${booking.vehicleName}`,
+
+            order_id: order.razorpayOrderId,
+
+            handler: async function (response) {
+
+    try {
+
+        console.log(
+            "Razorpay payment successful:",
+            response
+        );
+
+        // 1. Verify payment on backend
+        await verifyPayment({
+            razorpayOrderId:
+                response.razorpay_order_id,
+
+            razorpayPaymentId:
+                response.razorpay_payment_id,
+
+            razorpaySignature:
+                response.razorpay_signature,
+        });
+
+        // 2. Fetch updated booking
+        const updatedBooking =
+            await getBookingById(booking.id);
+
+        // 3. Update page immediately
+        setBooking(updatedBooking);
+
+    } catch (err) {
+
+        console.error(err);
+
+        setError(
+            err.response?.data?.message ||
+            "Payment verification failed."
+        );
+
+    } finally {
+
+        setPaying(false);
+
+    }
+},
+
+    //         handler: async function (response) {
+
+    //             console.log(
+    //     "Razorpay payment successful:",
+    //     response
+    // );
+
+    //             try {
+
+    //                 // 3. Verify payment on backend
+    //                 await verifyPayment({
+    //                     razorpayOrderId:
+    //                         response.razorpay_order_id,
+
+    //                     razorpayPaymentId:
+    //                         response.razorpay_payment_id,
+
+    //                     razorpaySignature:
+    //                         response.razorpay_signature,
+    //                 });
+
+    //                 // 4. Payment verified
+    //                 navigate(`/bookings/${booking.id}`);
+
+    //             } catch (err) {
+
+    //                 console.error(err);
+
+    //                 setError(
+    //                     err.response?.data?.message ||
+    //                     "Payment verification failed."
+    //                 );
+
+    //             } finally {
+
+    //                 setPaying(false);
+
+    //             }
+    //         },
+
+            prefill: {
+                name: "",
+                email: "",
+            },
+
+            theme: {
+                color: "#111827",
+            },
+        };
+
+        const razorpay = new window.Razorpay(options);
+
+        // razorpay.on("payment.failed", function () {
+
+        //     setError(
+        //         "Payment failed. Please try again."
+        //     );
+
+        //     setPaying(false);
+
+        // });
+
+        razorpay.on("payment.failed", function (response) {
+
+    console.error(
+        "Razorpay payment failed:",
+        response
+    );
+
+    console.error(
+        "Error:",
+        response.error
+    );
+
+    setError(
+        response.error?.description ||
+        "Payment failed. Please try again."
+    );
+
+    setPaying(false);
+
+});
+
+        razorpay.open();
+
+    } catch (err) {
+
+        console.error(err);
+
+        setError(
+            err.response?.data?.message ||
+            "Unable to start payment."
+        );
+
+        setPaying(false);
+    }
+};
 
     if (loading) {
         return (
@@ -80,13 +249,29 @@ function BookingConfirmation() {
                         className="mx-auto text-green-600"
                     />
 
-                    <h1 className="mt-5 text-3xl font-bold text-gray-900">
+                    {/* <h1 className="mt-5 text-3xl font-bold text-gray-900">
                         Booking Created!
                     </h1>
 
                     <p className="mt-2 text-gray-500">
                         Your rental booking has been successfully created.
-                    </p>
+                    </p> */}
+
+                    <h1 className="mt-5 text-3xl font-bold text-gray-900">
+    {booking.status === "PAYMENT_PENDING"
+        ? "Complete Your Payment"
+        : booking.status === "CONFIRMED"
+        ? "Booking Confirmed!"
+        : "Booking"}
+</h1>
+
+<p className="mt-2 text-gray-500">
+    {booking.status === "PAYMENT_PENDING"
+        ? "Your vehicle has been temporarily reserved. Complete payment to confirm your booking."
+        : booking.status === "CONFIRMED"
+        ? "Your rental booking has been successfully confirmed."
+        : "Your booking details are shown below."}
+</p>
 
                 </div>
 
@@ -108,9 +293,25 @@ function BookingConfirmation() {
 
                         </div>
 
-                        <span className="rounded-full bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700">
+                        {/* <span className="rounded-full bg-yellow-50 px-4 py-2 text-sm font-semibold text-yellow-700">
                             {booking.status}
-                        </span>
+                        </span> */}
+
+                        <span
+    className={`rounded-full px-4 py-2 text-sm font-semibold ${
+        booking.status === "PAYMENT_PENDING"
+            ? "bg-yellow-50 text-yellow-700"
+            : booking.status === "CONFIRMED"
+            ? "bg-green-50 text-green-700"
+            : "bg-gray-100 text-gray-700"
+    }`}
+>
+    {booking.status === "PAYMENT_PENDING"
+        ? "PAYMENT PENDING"
+        : booking.status === "CONFIRMED"
+        ? "CONFIRMED"
+        : booking.status}
+</span>
 
                     </div>
 
@@ -234,16 +435,15 @@ function BookingConfirmation() {
 
                     {/* Actions */}
 
-                    <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                    {/* <div className="mt-8 grid gap-3 sm:grid-cols-2">
 
                         <button
-                            onClick={() =>
-                                navigate("/bookings")
-                            }
-                            className="rounded-xl bg-gray-900 py-3 font-semibold text-white hover:bg-gray-800"
-                        >
-                            My Bookings
-                        </button>
+    onClick={handlePayment}
+    disabled={paying}
+    className="rounded-xl bg-gray-900 py-3 font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+>
+    {paying ? "Opening Payment..." : "Pay Now"}
+</button>
 
                         <button
                             onClick={() =>
@@ -254,7 +454,58 @@ function BookingConfirmation() {
                             Back to Home
                         </button>
 
-                    </div>
+                    </div> */}
+
+                    {/* Actions */}
+
+<div className="mt-8">
+
+    {booking.status === "PAYMENT_PENDING" && (
+        <div className="grid gap-3 sm:grid-cols-2">
+
+            <button
+                onClick={handlePayment}
+                disabled={paying}
+                className="rounded-xl bg-gray-900 py-3 font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+                {paying
+                    ? "Opening Payment..."
+                    : "Pay Now"}
+            </button>
+
+            <button
+                onClick={() => navigate("/")}
+                className="rounded-xl border border-gray-200 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+            >
+                Back to Home
+            </button>
+
+        </div>
+    )}
+
+    {booking.status === "CONFIRMED" && (
+        <div className="grid gap-3 sm:grid-cols-2">
+
+            <button
+                onClick={() =>
+                    navigate("/bookings")
+                }
+                className="rounded-xl bg-gray-900 py-3 font-semibold text-white hover:bg-gray-800"
+            >
+                View My Bookings
+            </button>
+
+            <button
+                onClick={() => navigate("/")}
+                className="rounded-xl border border-gray-200 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+            >
+                Back to Home
+            </button>
+
+        </div>
+    )}
+
+</div>
 
                 </div>
 

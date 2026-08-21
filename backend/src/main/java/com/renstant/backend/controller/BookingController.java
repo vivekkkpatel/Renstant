@@ -46,7 +46,10 @@ public class BookingController {
                 booking.getId(),
                 booking.getVehicle().getId(),
                 booking.getVehicle().getName(),
-                booking.getVehicleUnit().getId(),
+                // booking.getVehicleUnit().getId(),
+                  booking.getVehicleUnit() != null
+                    ? booking.getVehicleUnit().getId()
+                    : null,
                 booking.getStartDateTime(),
                 booking.getEndDateTime(),
                 booking.getTotalPrice(),

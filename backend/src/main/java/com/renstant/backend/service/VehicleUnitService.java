@@ -101,18 +101,20 @@ if (!Boolean.TRUE.equals(vehicle.getActive())) {
             );
 
     List<BookingStatus> blockingStatuses = List.of(
-            BookingStatus.PENDING,
-            BookingStatus.CONFIRMED,
-            BookingStatus.ACTIVE
-    );
+        BookingStatus.PAYMENT_PENDING,
+        BookingStatus.PENDING,
+        BookingStatus.CONFIRMED,
+        BookingStatus.ACTIVE
+);
 
     List<Long> unavailableIds =
             bookingRepository.findUnavailableUnitIds(
-                    vehicleId,
-                    start,
-                    end,
-                    blockingStatuses
-            );
+        vehicleId,
+        start,
+        end,
+        blockingStatuses,
+        LocalDateTime.now()
+);
 
     return operationalUnits.stream()
             .filter(unit -> !unavailableIds.contains(unit.getId()))
@@ -150,18 +152,20 @@ public List<VehicleUnit> getAvailableUnitsForBooking(
                     );
 
     List<BookingStatus> blockingStatuses = List.of(
-            BookingStatus.PENDING,
-            BookingStatus.CONFIRMED,
-            BookingStatus.ACTIVE
-    );
+        BookingStatus.PAYMENT_PENDING,
+        BookingStatus.PENDING,
+        BookingStatus.CONFIRMED,
+        BookingStatus.ACTIVE
+);
 
     List<Long> unavailableIds =
             bookingRepository.findUnavailableUnitIds(
-                    vehicleId,
-                    start,
-                    end,
-                    blockingStatuses
-            );
+        vehicleId,
+        start,
+        end,
+        blockingStatuses,
+        LocalDateTime.now()
+);
 
     return operationalUnits.stream()
             .filter(unit -> !unavailableIds.contains(unit.getId()))

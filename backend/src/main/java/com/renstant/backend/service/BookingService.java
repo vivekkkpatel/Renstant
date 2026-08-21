@@ -10,6 +10,8 @@ import com.renstant.backend.repository.VehicleRepository;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,6 +29,9 @@ public class BookingService {
         private final BookingRepository bookingRepository;
         private final VehicleRepository vehicleRepository;
         private final VehicleUnitService vehicleUnitService;
+
+        @Value("${booking.payment-expiry-minutes}")
+        private long paymentExpiryMinutes;
 
         public BookingService(
                         BookingRepository bookingRepository,
@@ -103,7 +108,10 @@ public class BookingService {
                 booking.setEndDateTime(end);
 
                 booking.setTotalPrice(totalPrice);
-                booking.setStatus(BookingStatus.PENDING);
+                booking.setStatus(BookingStatus.PAYMENT_PENDING);
+                booking.setPaymentExpiresAt(
+        LocalDateTime.now().plusMinutes(paymentExpiryMinutes)
+);
 
                 booking.setPickupType(request.getPickupType());
 
@@ -211,22 +219,48 @@ public class BookingService {
                 return bookingRepository.save(booking);
         }
 
+        // @Transactional
+        // public Booking activateBooking(
+        //                 Long bookingId,
+        //                 User partner) {
+
+        //         Booking booking = getPartnerBooking(bookingId, partner);
+
+        //         if (booking.getStatus() != BookingStatus.CONFIRMED) {
+        //                 throw new ConflictException(
+        //                                 "Only confirmed bookings can be activated");
+        //         }
+
+        //         booking.setStatus(BookingStatus.ACTIVE);
+
+        //         return bookingRepository.save(booking);
+        // }
+
         @Transactional
-        public Booking activateBooking(
-                        Long bookingId,
-                        User partner) {
+public Booking activateBooking(
+        Long bookingId,
+        User partner) {
 
-                Booking booking = getPartnerBooking(bookingId, partner);
+    Booking booking = getPartnerBooking(bookingId, partner);
 
-                if (booking.getStatus() != BookingStatus.CONFIRMED) {
-                        throw new ConflictException(
-                                        "Only confirmed bookings can be activated");
-                }
+    // Booking must be confirmed before it can become active
+    if (booking.getStatus() != BookingStatus.CONFIRMED) {
+        throw new ConflictException(
+                "Only confirmed bookings can be activated"
+        );
+    }
 
-                booking.setStatus(BookingStatus.ACTIVE);
+    // Rental cannot be started before its scheduled start time
+    if (LocalDateTime.now().isBefore(booking.getStartDateTime())) {
+        throw new ConflictException(
+                "Booking cannot be activated before the rental start time"
+        );
+    }
 
-                return bookingRepository.save(booking);
-        }
+    booking.setStatus(BookingStatus.ACTIVE);
+
+    return bookingRepository.save(booking);
+}
 
         @Transactional
         public Booking completeBooking(

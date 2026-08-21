@@ -26,8 +26,9 @@ public class Booking {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
-    // Physical vehicle assigned to this booking.
-    // Can remain null until the booking is confirmed/assigned.
+    // Physical vehicle reserved for this booking.
+    // Reserved during PAYMENT_PENDING and permanently assigned
+    // once payment is successfully completed.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_unit_id")
     private VehicleUnit vehicleUnit;
@@ -53,6 +54,9 @@ public class Booking {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = true)
+private LocalDateTime paymentExpiresAt;
 
     @PrePersist
     protected void onCreate() {
