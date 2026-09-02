@@ -22,7 +22,7 @@ public class ShopResponse {
 
     private Double rating;
     private Boolean active;
-    private Boolean temporarilyClosed;
+    
 
     private Long ownerId;
     private String ownerName;

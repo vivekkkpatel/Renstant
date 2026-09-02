@@ -35,21 +35,20 @@ public class ShopController {
         Shop shop = shopService.createShop(request, owner);
 
         ShopResponse response = new ShopResponse(
-                shop.getId(),
-                shop.getName(),
-                shop.getDescription(),
-                shop.getPhone(),
-                shop.getAddressLine(),
-                shop.getCity(),
-                shop.getState(),
-                shop.getPincode(),
-                shop.getLatitude(),
-                shop.getLongitude(),
-                shop.getRating(),
-                shop.getActive(),
-                shop.getTemporarilyClosed(),
-                shop.getOwner().getId(),
-                shop.getOwner().getName());
+        shop.getId(),
+        shop.getName(),
+        shop.getDescription(),
+        shop.getPhone(),
+        shop.getAddressLine(),
+        shop.getCity(),
+        shop.getState(),
+        shop.getPincode(),
+        shop.getLatitude(),
+        shop.getLongitude(),
+        shop.getRating(),
+        shop.getActive(),
+        shop.getOwner().getId(),
+        shop.getOwner().getName());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -58,23 +57,22 @@ public class ShopController {
 
     private ShopResponse toResponse(Shop shop) {
 
-        return new ShopResponse(
-                shop.getId(),
-                shop.getName(),
-                shop.getDescription(),
-                shop.getPhone(),
-                shop.getAddressLine(),
-                shop.getCity(),
-                shop.getState(),
-                shop.getPincode(),
-                shop.getLatitude(),
-                shop.getLongitude(),
-                shop.getRating(),
-                shop.getActive(),
-                shop.getTemporarilyClosed(),
-                shop.getOwner().getId(),
-                shop.getOwner().getName());
-    }
+    return new ShopResponse(
+            shop.getId(),
+            shop.getName(),
+            shop.getDescription(),
+            shop.getPhone(),
+            shop.getAddressLine(),
+            shop.getCity(),
+            shop.getState(),
+            shop.getPincode(),
+            shop.getLatitude(),
+            shop.getLongitude(),
+            shop.getRating(),
+            shop.getActive(),
+            shop.getOwner().getId(),
+            shop.getOwner().getName());
+}
 
     @GetMapping
     public ResponseEntity<List<ShopResponse>> getAllShops(

@@ -12,16 +12,20 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import com.renstant.backend.repository.ShopOperatingHoursRepository;
+
+
+
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.renstant.backend.exception.ConflictException;
-import com.renstant.backend.exception.ResourceNotFoundException;
-import com.renstant.backend.exception.ForbiddenException;
-
 import org.springframework.transaction.annotation.Transactional;
+
+import com.renstant.backend.repository.ShopClosureRepository;
 
 @Service
 public class BookingService {
@@ -29,6 +33,8 @@ public class BookingService {
         private final BookingRepository bookingRepository;
         private final VehicleRepository vehicleRepository;
         private final VehicleUnitService vehicleUnitService;
+        private final ShopClosureRepository shopClosureRepository;
+        private final ShopOperatingHoursRepository operatingHoursRepository;
 
         @Value("${booking.payment-expiry-minutes}")
         private long paymentExpiryMinutes;
@@ -36,11 +42,15 @@ public class BookingService {
         public BookingService(
                         BookingRepository bookingRepository,
                         VehicleRepository vehicleRepository,
-                        VehicleUnitService vehicleUnitService) {
+                        VehicleUnitService vehicleUnitService, 
+                        ShopClosureRepository shopClosureRepository, 
+                        ShopOperatingHoursRepository operatingHoursRepository) {
 
                 this.bookingRepository = bookingRepository;
                 this.vehicleRepository = vehicleRepository;
                 this.vehicleUnitService = vehicleUnitService;
+                this.shopClosureRepository = shopClosureRepository;
+                this.operatingHoursRepository=operatingHoursRepository;
         }
 
         @Transactional
@@ -76,6 +86,29 @@ public class BookingService {
                         throw new ConflictException(
                                         "Vehicle is currently unavailable for booking");
                 }
+
+                validateShopOperatingHours(
+        vehicle.getShop(),
+        start,
+        end
+);
+
+                LocalDate startDate = start.toLocalDate();
+LocalDate endDate = end.toLocalDate();
+
+boolean shopClosed =
+        shopClosureRepository
+                .existsByShopIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                        vehicle.getShop().getId(),
+                        endDate,
+                        startDate
+                );
+
+if (shopClosed) {
+    throw new ConflictException(
+            "Shop is temporarily closed during the selected rental period"
+    );
+}
 
                 List<VehicleUnit> availableUnits = vehicleUnitService.getAvailableUnitsForBooking(
                                 vehicle.getId(),
@@ -124,6 +157,61 @@ public class BookingService {
 
                 return bookingRepository.save(booking);
         }
+
+        private void validateShopOperatingHours(
+        Shop shop,
+        LocalDateTime pickup,
+        LocalDateTime returnTime) {
+
+    DayOfWeek pickupDay = pickup.getDayOfWeek();
+    DayOfWeek returnDay = returnTime.getDayOfWeek();
+
+    ShopOperatingHours pickupHours =
+            operatingHoursRepository
+                    .findByShopIdAndDayOfWeek(
+                            shop.getId(),
+                            pickupDay)
+                    .orElseThrow(() ->
+                            new ConflictException(
+                                    "Shop operating hours are not configured for pickup day"));
+
+    ShopOperatingHours returnHours =
+            operatingHoursRepository
+                    .findByShopIdAndDayOfWeek(
+                            shop.getId(),
+                            returnDay)
+                    .orElseThrow(() ->
+                            new ConflictException(
+                                    "Shop operating hours are not configured for return day"));
+
+    // Pickup day is completely closed
+    if (Boolean.TRUE.equals(pickupHours.getClosed())) {
+        throw new ConflictException(
+                "Shop is closed on the selected pickup day");
+    }
+
+    // Return day is completely closed
+    if (Boolean.TRUE.equals(returnHours.getClosed())) {
+        throw new ConflictException(
+                "Shop is closed on the selected return day");
+    }
+
+    // Pickup must be inside shop hours
+    if (pickup.toLocalTime().isBefore(pickupHours.getOpeningTime()) ||
+            pickup.toLocalTime().isAfter(pickupHours.getClosingTime())) {
+
+        throw new ConflictException(
+                "Pickup time is outside shop operating hours");
+    }
+
+    // Return must be inside shop hours
+    if (returnTime.toLocalTime().isBefore(returnHours.getOpeningTime()) ||
+            returnTime.toLocalTime().isAfter(returnHours.getClosingTime())) {
+
+        throw new ConflictException(
+                "Return time is outside shop operating hours");
+    }
+}
 
         public List<Booking> getCustomerBookings(User customer) {
 

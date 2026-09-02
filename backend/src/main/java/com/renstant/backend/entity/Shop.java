@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "shops")
@@ -47,9 +51,23 @@ public class Shop {
 
     private Boolean active = true;
 
-    private Boolean temporarilyClosed = false;
+    // private Boolean temporarilyClosed = false;
 
-    private LocalDate closedUntil;
+    // private LocalDate closedUntil;
+
+    @OneToMany(
+    mappedBy = "shop",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+)
+private List<ShopOperatingHours> operatingHours = new ArrayList<>();
+
+@OneToMany(
+    mappedBy = "shop",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+)
+private List<ShopClosure> closures = new ArrayList<>();
 
     // Shop owner
     @ManyToOne(fetch = FetchType.LAZY)
