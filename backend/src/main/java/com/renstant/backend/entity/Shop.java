@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shops")
@@ -50,6 +51,14 @@ public class Shop {
     private Double rating = 0.0;
 
     private Boolean active = true;
+
+    @Column(nullable = false, updatable = false)
+private LocalDateTime createdAt;
+
+@PrePersist
+protected void onCreate() {
+    createdAt = LocalDateTime.now();
+}
 
     // private Boolean temporarilyClosed = false;
 

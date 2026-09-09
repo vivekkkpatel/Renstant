@@ -1,7 +1,47 @@
+// package com.renstant.backend.dto;
+
+// import java.time.LocalDateTime;
+
+// import lombok.AllArgsConstructor;
+// import lombok.Getter;
+
+// import java.time.LocalDateTime;
+
+// @Getter
+// @AllArgsConstructor
+// public class ShopResponse {
+
+//     private Long id;
+//     private String name;
+//     private String description;
+//     private String phone;
+
+//     private String addressLine;
+//     private String city;
+//     private String state;
+//     private String pincode;
+
+//     private Double latitude;
+//     private Double longitude;
+
+//     private Double rating;
+//     private Boolean active;
+    
+
+//     private Long ownerId;
+//     private String ownerName;
+
+//     private LocalDateTime createdAt;
+// private Long completedRentals;
+// }
+
+
 package com.renstant.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
@@ -22,7 +62,9 @@ public class ShopResponse {
 
     private Double rating;
     private Boolean active;
-    
+
+    private LocalDateTime createdAt;
+    private Long completedRentals;
 
     private Long ownerId;
     private String ownerName;

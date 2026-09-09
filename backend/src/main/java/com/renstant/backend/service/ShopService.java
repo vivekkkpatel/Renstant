@@ -4,9 +4,11 @@ import com.renstant.backend.dto.CreateShopRequest;
 import com.renstant.backend.entity.Shop;
 import com.renstant.backend.entity.User;
 import com.renstant.backend.exception.ResourceNotFoundException;
+import com.renstant.backend.repository.BookingRepository;
 import com.renstant.backend.repository.ShopRepository;
 
 import org.springframework.stereotype.Service;
+import com.renstant.backend.entity.BookingStatus;
 
 import java.util.List;
 
@@ -15,8 +17,13 @@ public class ShopService {
 
     private final ShopRepository shopRepository;
 
-    public ShopService(ShopRepository shopRepository) {
+    private final BookingRepository bookingRepository;
+
+    public ShopService(ShopRepository shopRepository, BookingRepository bookingRepository) {
         this.shopRepository = shopRepository;
+        this.bookingRepository=bookingRepository;
+        
+
     }
 
     public Shop createShop(CreateShopRequest request, User owner) {
@@ -56,10 +63,25 @@ public Shop getShopById(Long id) {
         new ResourceNotFoundException("Shop not found"));
 }
 
+public List<Shop> getMyShops(User owner) {
+
+    return shopRepository.findByOwnerId(owner.getId());
+}
+
 public Shop getMyShop(User owner) {
 
     return shopRepository.findByOwnerId(owner.getId())
+            .stream()
+            .findFirst()
             .orElseThrow(() ->
                     new ResourceNotFoundException("Shop not found"));
+}
+
+public long getCompletedRentals(Long shopId) {
+
+    return bookingRepository.countByVehicleShopIdAndStatus(
+            shopId,
+            BookingStatus.COMPLETED
+    );
 }
 }

@@ -53,6 +53,7 @@ public class AuthService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
+        user.setDateOfBirth(request.getDateOfBirth());
         user.setRole(role);
 
         user.setPassword(

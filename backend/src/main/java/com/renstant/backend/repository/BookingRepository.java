@@ -66,6 +66,11 @@ List<Long> findUnavailableUnitIds(
         LocalDateTime time
 );
 
+long countByVehicleShopIdAndStatus(
+        Long shopId,
+        BookingStatus status
+);
+
 
 // @Lock(LockModeType.PESSIMISTIC_WRITE)
 // @Query("""

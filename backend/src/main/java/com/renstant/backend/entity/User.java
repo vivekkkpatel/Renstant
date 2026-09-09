@@ -3,6 +3,7 @@ package com.renstant.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,6 +29,9 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String phone;
+
+    @Column(nullable = false)
+private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

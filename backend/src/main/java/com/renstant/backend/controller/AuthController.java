@@ -42,6 +42,7 @@ public ResponseEntity<LoginResponse> login(
                 user.getName(),
                 user.getEmail(),
                 user.getPhone(),
+                user.getDateOfBirth(),
                 user.getRole()
         );
 

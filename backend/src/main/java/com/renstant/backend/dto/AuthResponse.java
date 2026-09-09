@@ -1,5 +1,7 @@
 package com.renstant.backend.dto;
 
+import java.time.LocalDate;
+
 import com.renstant.backend.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,5 +14,6 @@ public class AuthResponse {
     private String name;
     private String email;
     private String phone;
+    private LocalDate dateOfBirth;
     private UserRole role;
 }

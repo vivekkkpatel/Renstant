@@ -14,7 +14,9 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     List<Shop> findByCityIgnoreCase(String city);
 
-    Optional<Shop> findByOwnerId(Long ownerId);
+    // Optional<Shop> findByOwnerId(Long ownerId);
+
+    List<Shop> findByOwnerId(Long ownerId);
 
     public interface ShopOperatingHoursRepository
         extends JpaRepository<ShopOperatingHours, Long> {
