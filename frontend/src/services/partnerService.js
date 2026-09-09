@@ -1,7 +1,12 @@
 import api from "./api";
 
-export const getMyShop = async () => {
-    const response = await api.get("/shops/my-shop");
+// export const getMyShop = async () => {
+//     const response = await api.get("/shops/my-shop");
+//     return response.data;
+// };
+
+export const getMyShops = async () => {
+    const response = await api.get("/shops/my-shops");
     return response.data;
 };
 

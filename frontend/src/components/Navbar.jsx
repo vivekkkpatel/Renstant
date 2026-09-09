@@ -52,13 +52,6 @@ function Navbar() {
                         Home
                     </Link>
 
-                    <Link
-                        to="/search"
-                        className="text-sm font-medium text-gray-700 transition hover:text-gray-900"
-                    >
-                        Vehicles
-                    </Link>
-
 
                     {isLoggedIn && user?.role === "CUSTOMER" && (
 
@@ -190,13 +183,7 @@ function Navbar() {
                             Home
                         </Link>
 
-                        <Link
-                            to="/search"
-                            onClick={closeMenu}
-                            className="text-sm font-medium text-gray-700"
-                        >
-                            Vehicles
-                        </Link>
+                        
 
 
                         {isLoggedIn &&
